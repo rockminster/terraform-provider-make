@@ -108,8 +108,8 @@ After making code changes, always run this validation sequence:
 
 ### Lint Failures
 - golangci-lint not in PATH: Run `export PATH=$PATH:~/go/bin` first
-- Unused test functions: Expected for template code in `provider_test.go`, can be ignored
-- Make lint currently fails due to unused test helper functions - this is expected until actual tests are implemented
+- Unused test functions: Expected for template code in `provider_test.go`. To avoid general lint failures, configure golangci-lint to ignore unused code warnings in test files by updating `.golangci.yml` or using `//nolint:unused` comments on the relevant functions.
+- Do not ignore general lint failures. Instead, suppress only the unused function warnings in `provider_test.go` until actual tests are implemented.
 
 ### Documentation Generation
 - Terraform not found: Install Terraform as shown in Prerequisites section
