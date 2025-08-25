@@ -66,6 +66,12 @@ After making code changes, always run this validation sequence:
      active      = false
      team_id     = "test-team"
    }
+   
+   resource "make_connection" "test" {
+     name     = "Test Connection"
+     app_name = "http"
+     team_id  = "test-team"
+   }
    EOF
    terraform init
    terraform plan
@@ -95,14 +101,23 @@ After making code changes, always run this validation sequence:
 
 ### Core Provider Code
 - `internal/provider/provider.go` - Main provider implementation
+- `internal/provider/client.go` - Make.com API client implementation
 - `internal/provider/scenario_resource.go` - Scenario resource implementation
-- `internal/provider/scenario_data_source.go` - Scenario data source implementation  
+- `internal/provider/scenario_data_source.go` - Scenario data source implementation
+- `internal/provider/connection_resource.go` - Connection resource implementation  
+- `internal/provider/connection_data_source.go` - Connection data source implementation
+- `internal/provider/webhook_resource.go` - Webhook resource implementation
 - `internal/provider/provider_test.go` - Provider test helpers
+- `internal/provider/client_test.go` - API client tests
+- `internal/provider/resource_test.go` - Resource acceptance tests
 
 ### Example Configurations
 - `examples/provider/provider.tf` - Full provider usage example
 - `examples/resources/make_scenario/resource.tf` - Scenario resource example
+- `examples/resources/make_connection/resource.tf` - Connection resource example
+- `examples/resources/make_webhook/resource.tf` - Webhook resource example
 - `examples/data-sources/make_scenario/data-source.tf` - Scenario data source example
+- `examples/data-sources/make_connection/data-source.tf` - Connection data source example
 
 ## Common Issues and Solutions
 
