@@ -115,6 +115,56 @@ resource "make_scenario" "example" {
 
 - `id` - Scenario identifier
 
+### make_connection
+
+Manages Make.com connections to external services.
+
+#### Example Usage
+
+```hcl
+resource "make_connection" "example" {
+  name     = "Gmail Connection"
+  app_name = "gmail"
+  team_id  = "team-123"
+}
+```
+
+#### Arguments
+
+- `name` (Required) - Name of the connection
+- `app_name` (Required) - Name of the app for this connection (e.g., 'gmail', 'slack')
+- `team_id` (Optional) - Team ID where the connection belongs
+
+#### Attributes
+
+- `id` - Connection identifier
+- `verified` - Whether the connection is verified
+
+### make_webhook
+
+Manages Make.com webhooks for incoming data.
+
+#### Example Usage
+
+```hcl
+resource "make_webhook" "example" {
+  name    = "Incoming Webhook"
+  team_id = "team-456"
+  active  = true
+}
+```
+
+#### Arguments
+
+- `name` (Required) - Name of the webhook
+- `team_id` (Optional) - Team ID where the webhook belongs
+- `active` (Optional) - Whether the webhook is active
+
+#### Attributes
+
+- `id` - Webhook identifier
+- `url` - URL endpoint for the webhook
+
 ## Available Data Sources
 
 ### make_scenario
@@ -139,6 +189,29 @@ data "make_scenario" "example" {
 - `description` - Description of the scenario
 - `active` - Whether the scenario is active
 - `team_id` - Team ID where the scenario belongs
+
+### make_connection
+
+Reads information about an existing Make.com connection.
+
+#### Example Usage
+
+```hcl
+data "make_connection" "example" {
+  id = "connection-id-123"
+}
+```
+
+#### Arguments
+
+- `id` (Required) - Connection identifier
+
+#### Attributes
+
+- `name` - Name of the connection
+- `app_name` - Name of the app for this connection
+- `team_id` - Team ID where the connection belongs
+- `verified` - Whether the connection is verified
 
 ## Developing the Provider
 
@@ -187,10 +260,13 @@ This provider is designed to work with the Make.com API. For more information ab
 
 ## Roadmap
 
-- [ ] Implement comprehensive scenario management
-- [ ] Add connection resource management
+- [x] Implement comprehensive scenario management
+- [x] Add connection resource management
+- [x] Add webhook management
+- [x] Implement actual API calls to Make.com endpoints
+- [x] Add enhanced error handling and validation
+- [x] Add basic test coverage
 - [ ] Add team and organization management
-- [ ] Add webhook management
 - [ ] Add data store management
-- [ ] Add comprehensive error handling and validation
-- [ ] Add comprehensive test coverage
+- [ ] Add more comprehensive test coverage including acceptance tests
+- [ ] Add advanced configuration options for webhooks and connections

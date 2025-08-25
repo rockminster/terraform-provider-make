@@ -102,20 +102,41 @@ func (r *ScenarioResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.CreateScenario(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create scenario, got error: %s", err))
-	//     return
-	// }
+	// Prepare the API request
+	apiReq := ScenarioRequest{
+		Name:   data.Name.ValueString(),
+		Active: data.Active.ValueBool(),
+	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.StringValue("example-id")
+	if !data.Description.IsNull() {
+		apiReq.Description = data.Description.ValueString()
+	}
+
+	if !data.TeamId.IsNull() {
+		apiReq.TeamID = data.TeamId.ValueString()
+	}
+
+	// Create the scenario via API
+	scenario, err := r.client.CreateScenario(ctx, apiReq)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create scenario, got error: %s", err))
+		return
+	}
+
+	// Map response to Terraform state
+	data.Id = types.StringValue(scenario.ID)
+	data.Name = types.StringValue(scenario.Name)
+	data.Active = types.BoolValue(scenario.Active)
+
+	if scenario.Description != "" {
+		data.Description = types.StringValue(scenario.Description)
+	}
+
+	if scenario.TeamID != "" {
+		data.TeamId = types.StringValue(scenario.TeamID)
+	}
 
 	// Write logs using the tflog package
-	// Documentation: https://terraform.io/plugin/log
 	tflog.Trace(ctx, "created a scenario resource")
 
 	// Save data into Terraform state
@@ -132,13 +153,29 @@ func (r *ScenarioResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.GetScenario(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read scenario, got error: %s", err))
-	//     return
-	// }
+	// Get the scenario from the API
+	scenario, err := r.client.GetScenario(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read scenario, got error: %s", err))
+		return
+	}
+
+	// Map API response to Terraform state
+	data.Id = types.StringValue(scenario.ID)
+	data.Name = types.StringValue(scenario.Name)
+	data.Active = types.BoolValue(scenario.Active)
+
+	if scenario.Description != "" {
+		data.Description = types.StringValue(scenario.Description)
+	} else {
+		data.Description = types.StringNull()
+	}
+
+	if scenario.TeamID != "" {
+		data.TeamId = types.StringValue(scenario.TeamID)
+	} else {
+		data.TeamId = types.StringNull()
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -154,13 +191,43 @@ func (r *ScenarioResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.UpdateScenario(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update scenario, got error: %s", err))
-	//     return
-	// }
+	// Prepare the API request
+	apiReq := ScenarioRequest{
+		Name:   data.Name.ValueString(),
+		Active: data.Active.ValueBool(),
+	}
+
+	if !data.Description.IsNull() {
+		apiReq.Description = data.Description.ValueString()
+	}
+
+	if !data.TeamId.IsNull() {
+		apiReq.TeamID = data.TeamId.ValueString()
+	}
+
+	// Update the scenario via API
+	scenario, err := r.client.UpdateScenario(ctx, data.Id.ValueString(), apiReq)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update scenario, got error: %s", err))
+		return
+	}
+
+	// Map response to Terraform state
+	data.Id = types.StringValue(scenario.ID)
+	data.Name = types.StringValue(scenario.Name)
+	data.Active = types.BoolValue(scenario.Active)
+
+	if scenario.Description != "" {
+		data.Description = types.StringValue(scenario.Description)
+	} else {
+		data.Description = types.StringNull()
+	}
+
+	if scenario.TeamID != "" {
+		data.TeamId = types.StringValue(scenario.TeamID)
+	} else {
+		data.TeamId = types.StringNull()
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -176,13 +243,12 @@ func (r *ScenarioResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := r.client.DeleteScenario(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete scenario, got error: %s", err))
-	//     return
-	// }
+	// Delete the scenario via API
+	err := r.client.DeleteScenario(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete scenario, got error: %s", err))
+		return
+	}
 }
 
 func (r *ScenarioResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

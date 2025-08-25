@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -92,6 +94,9 @@ func (p *MakeProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	client := &MakeAPIClient{
 		ApiToken: apiToken,
 		BaseUrl:  baseUrl,
+		HTTPClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
 	}
 
 	resp.DataSourceData = client
@@ -101,12 +106,15 @@ func (p *MakeProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *MakeProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewScenarioResource,
+		NewConnectionResource,
+		NewWebhookResource,
 	}
 }
 
 func (p *MakeProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewScenarioDataSource,
+		NewConnectionDataSource,
 	}
 }
 
@@ -126,6 +134,7 @@ func New(version string) func() provider.Provider {
 
 // MakeAPIClient represents the Make.com API client
 type MakeAPIClient struct {
-	ApiToken string
-	BaseUrl  string
+	ApiToken   string
+	BaseUrl    string
+	HTTPClient *http.Client
 }
