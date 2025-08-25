@@ -26,16 +26,51 @@ resource "make_scenario" "example" {
   team_id     = "your-team-id"
 }
 
+# Create a connection
+resource "make_connection" "gmail" {
+  name     = "Gmail Connection"
+  app_name = "gmail"
+  team_id  = "your-team-id"
+}
+
+# Create a webhook
+resource "make_webhook" "incoming" {
+  name    = "Incoming Webhook"
+  team_id = "your-team-id"
+  active  = true
+}
+
 # Read an existing scenario
 data "make_scenario" "existing" {
   id = "existing-scenario-id"
 }
 
-# Output the scenario details
+# Read an existing connection
+data "make_connection" "existing_conn" {
+  id = "existing-connection-id"
+}
+
+# Output the resource details
 output "scenario_id" {
   value = make_scenario.example.id
 }
 
+output "connection_id" {
+  value = make_connection.gmail.id
+}
+
+output "webhook_id" {
+  value = make_webhook.incoming.id
+}
+
+output "webhook_url" {
+  value = make_webhook.incoming.url
+}
+
 output "existing_scenario_name" {
   value = data.make_scenario.existing.name
+}
+
+output "existing_connection_verified" {
+  value = data.make_connection.existing_conn.verified
 }

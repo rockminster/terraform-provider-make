@@ -95,23 +95,31 @@ func (d *ScenarioDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// httpResp, err := d.client.GetScenario(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read scenario, got error: %s", err))
-	//     return
-	// }
+	// Get the scenario from the API
+	scenario, err := d.client.GetScenario(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read scenario, got error: %s", err))
+		return
+	}
 
-	// For the purposes of this example code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Name = types.StringValue("example-scenario")
-	data.Description = types.StringValue("Example scenario description")
-	data.Active = types.BoolValue(true)
-	data.TeamId = types.StringValue("example-team-id")
+	// Map API response to Terraform state
+	data.Id = types.StringValue(scenario.ID)
+	data.Name = types.StringValue(scenario.Name)
+	data.Active = types.BoolValue(scenario.Active)
+
+	if scenario.Description != "" {
+		data.Description = types.StringValue(scenario.Description)
+	} else {
+		data.Description = types.StringNull()
+	}
+
+	if scenario.TeamID != "" {
+		data.TeamId = types.StringValue(scenario.TeamID)
+	} else {
+		data.TeamId = types.StringNull()
+	}
 
 	// Write logs using the tflog package
-	// Documentation: https://terraform.io/plugin/log
 	tflog.Trace(ctx, "read a scenario data source")
 
 	// Save data into Terraform state
