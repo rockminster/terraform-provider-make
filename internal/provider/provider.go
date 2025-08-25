@@ -63,7 +63,7 @@ func (p *MakeProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	// Default configuration values
 	apiToken := os.Getenv("MAKE_API_TOKEN")
 	baseUrl := os.Getenv("MAKE_BASE_URL")
-	
+
 	if baseUrl == "" {
 		baseUrl = "https://api.make.com/"
 	}
