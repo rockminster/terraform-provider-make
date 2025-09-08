@@ -92,8 +92,16 @@ func (d *DataStoreDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	data.Id = types.StringValue(ds.ID)
 	data.Name = types.StringValue(ds.Name)
-	data.Description = types.StringValue(ds.Description)
-	data.TeamId = types.StringValue(ds.TeamID)
+	if ds.Description == "" {
+		data.Description = types.StringNull()
+	} else {
+		data.Description = types.StringValue(ds.Description)
+	}
+	if ds.TeamID == "" {
+		data.TeamId = types.StringNull()
+	} else {
+		data.TeamId = types.StringValue(ds.TeamID)
+	}
 
 	tflog.Trace(ctx, "read a data store data source")
 
