@@ -75,7 +75,7 @@ func (c *MakeAPIClient) MakeRequest(ctx context.Context, method, endpoint string
 
 // HandleErrorResponse processes error responses from the API
 func (c *MakeAPIClient) HandleErrorResponse(resp *http.Response) error {
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *MakeAPIClient) CreateScenario(ctx context.Context, req ScenarioRequest)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return nil, c.HandleErrorResponse(resp)
@@ -125,7 +125,7 @@ func (c *MakeAPIClient) GetScenario(ctx context.Context, id string) (*ScenarioRe
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("scenario with ID %s not found", id)
@@ -150,7 +150,7 @@ func (c *MakeAPIClient) UpdateScenario(ctx context.Context, id string, req Scena
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("scenario with ID %s not found", id)
@@ -175,7 +175,7 @@ func (c *MakeAPIClient) DeleteScenario(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		// Already deleted or doesn't exist
@@ -212,7 +212,7 @@ func (c *MakeAPIClient) CreateConnection(ctx context.Context, req ConnectionRequ
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return nil, c.HandleErrorResponse(resp)
@@ -233,7 +233,7 @@ func (c *MakeAPIClient) GetConnection(ctx context.Context, id string) (*Connecti
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("connection with ID %s not found", id)
@@ -258,7 +258,7 @@ func (c *MakeAPIClient) UpdateConnection(ctx context.Context, id string, req Con
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("connection with ID %s not found", id)
@@ -283,7 +283,7 @@ func (c *MakeAPIClient) DeleteConnection(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		// Already deleted or doesn't exist
@@ -322,7 +322,7 @@ func (c *MakeAPIClient) CreateWebhook(ctx context.Context, req WebhookRequest) (
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return nil, c.HandleErrorResponse(resp)
@@ -343,7 +343,7 @@ func (c *MakeAPIClient) GetWebhook(ctx context.Context, id string) (*WebhookResp
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("webhook with ID %s not found", id)
@@ -368,7 +368,7 @@ func (c *MakeAPIClient) UpdateWebhook(ctx context.Context, id string, req Webhoo
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("webhook with ID %s not found", id)
@@ -393,7 +393,7 @@ func (c *MakeAPIClient) DeleteWebhook(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		// Already deleted or doesn't exist
@@ -426,7 +426,7 @@ func (c *MakeAPIClient) CreateTeam(ctx context.Context, req TeamRequest) (*TeamR
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return nil, c.HandleErrorResponse(resp)
@@ -447,7 +447,7 @@ func (c *MakeAPIClient) GetTeam(ctx context.Context, id string) (*TeamResponse, 
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("team with ID %s not found", id)
@@ -472,7 +472,7 @@ func (c *MakeAPIClient) UpdateTeam(ctx context.Context, id string, req TeamReque
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("team with ID %s not found", id)
@@ -497,7 +497,7 @@ func (c *MakeAPIClient) DeleteTeam(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		// Already deleted or doesn't exist
@@ -528,7 +528,7 @@ func (c *MakeAPIClient) CreateOrganization(ctx context.Context, req Organization
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return nil, c.HandleErrorResponse(resp)
@@ -549,7 +549,7 @@ func (c *MakeAPIClient) GetOrganization(ctx context.Context, id string) (*Organi
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("organization with ID %s not found", id)
@@ -574,7 +574,7 @@ func (c *MakeAPIClient) UpdateOrganization(ctx context.Context, id string, req O
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		return nil, fmt.Errorf("organization with ID %s not found", id)
@@ -599,7 +599,113 @@ func (c *MakeAPIClient) DeleteOrganization(ctx context.Context, id string) error
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == 404 {
+		// Already deleted or doesn't exist
+		return nil
+	}
+
+	if resp.StatusCode >= 400 {
+		return c.HandleErrorResponse(resp)
+	}
+
+	return nil
+}
+
+// DataStoreResponse represents a Make.com data store from the API
+type DataStoreResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	TeamID      string `json:"team_id,omitempty"`
+}
+
+// DataStoreRequest represents the request payload for creating/updating data stores
+type DataStoreRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	TeamID      string `json:"team_id,omitempty"`
+}
+
+// CreateDataStore creates a new data store in Make.com
+func (c *MakeAPIClient) CreateDataStore(ctx context.Context, req DataStoreRequest) (*DataStoreResponse, error) {
+	resp, err := c.MakeRequest(ctx, "POST", "v2/data-stores", req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var ds DataStoreResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ds); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &ds, nil
+}
+
+// GetDataStore retrieves a data store by ID from Make.com
+func (c *MakeAPIClient) GetDataStore(ctx context.Context, id string) (*DataStoreResponse, error) {
+	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("data store with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var ds DataStoreResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ds); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &ds, nil
+}
+
+// UpdateDataStore updates an existing data store in Make.com
+func (c *MakeAPIClient) UpdateDataStore(ctx context.Context, id string, req DataStoreRequest) (*DataStoreResponse, error) {
+	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("data store with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var ds DataStoreResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ds); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &ds, nil
+}
+
+// DeleteDataStore deletes a data store from Make.com
+func (c *MakeAPIClient) DeleteDataStore(ctx context.Context, id string) error {
+	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == 404 {
 		// Already deleted or doesn't exist

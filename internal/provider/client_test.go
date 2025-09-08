@@ -105,3 +105,20 @@ func TestWebhookResourceModel(t *testing.T) {
 		t.Errorf("Expected Active to be true, got %v", model.Active.ValueBool())
 	}
 }
+
+func TestDataStoreResourceModel(t *testing.T) {
+	model := DataStoreResourceModel{
+		Id:          types.StringValue("ds-123"),
+		Name:        types.StringValue("Test Data Store"),
+		Description: types.StringValue("Test Description"),
+		TeamId:      types.StringValue("team-999"),
+	}
+
+	if model.Name.ValueString() != "Test Data Store" {
+		t.Errorf("Expected Name to be 'Test Data Store', got %s", model.Name.ValueString())
+	}
+
+	if model.Description.ValueString() != "Test Description" {
+		t.Errorf("Expected Description to be 'Test Description', got %s", model.Description.ValueString())
+	}
+}
