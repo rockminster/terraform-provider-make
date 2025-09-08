@@ -113,6 +113,8 @@ func (r *TeamResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	if team.OrganizationID != "" {
 		data.OrganizationId = types.StringValue(team.OrganizationID)
+	} else {
+		data.OrganizationId = types.StringNull()
 	}
 
 	// Write logs using the tflog package
