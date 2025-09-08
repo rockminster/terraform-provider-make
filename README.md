@@ -397,5 +397,5 @@ This provider is designed to work with the Make.com API. For more information ab
 - [x] Add basic test coverage
 - [x] Add team and organization management
 - [x] Add data store management
-- [ ] Add more comprehensive test coverage including acceptance tests
+- [x] Add more comprehensive test coverage including acceptance tests
 - [ ] Add advanced configuration options for webhooks and connections
