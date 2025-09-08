@@ -165,6 +165,48 @@ resource "make_webhook" "example" {
 - `id` - Webhook identifier
 - `url` - URL endpoint for the webhook
 
+### make_team
+
+Manages Make.com teams.
+
+#### Example Usage
+
+```hcl
+resource "make_team" "example" {
+  name            = "Engineering Team"
+  organization_id = "org-123"
+}
+```
+
+#### Arguments
+
+- `name` (Required) - Name of the team
+- `organization_id` (Optional) - Organization ID where the team belongs
+
+#### Attributes
+
+- `id` - Team identifier
+
+### make_organization
+
+Manages Make.com organizations.
+
+#### Example Usage
+
+```hcl
+resource "make_organization" "example" {
+  name = "Example Org"
+}
+```
+
+#### Arguments
+
+- `name` (Required) - Name of the organization
+
+#### Attributes
+
+- `id` - Organization identifier
+
 ## Available Data Sources
 
 ### make_scenario
@@ -212,6 +254,47 @@ data "make_connection" "example" {
 - `app_name` - Name of the app for this connection
 - `team_id` - Team ID where the connection belongs
 - `verified` - Whether the connection is verified
+
+### make_team
+
+Reads information about an existing Make.com team.
+
+#### Example Usage
+
+```hcl
+data "make_team" "example" {
+  id = "team-id-123"
+}
+```
+
+#### Arguments
+
+- `id` (Required) - Team identifier
+
+#### Attributes
+
+- `name` - Name of the team
+- `organization_id` - Organization ID where the team belongs
+
+### make_organization
+
+Reads information about an existing Make.com organization.
+
+#### Example Usage
+
+```hcl
+data "make_organization" "example" {
+  id = "org-id-123"
+}
+```
+
+#### Arguments
+
+- `id` (Required) - Organization identifier
+
+#### Attributes
+
+- `name` - Name of the organization
 
 ## Developing the Provider
 
@@ -266,7 +349,7 @@ This provider is designed to work with the Make.com API. For more information ab
 - [x] Implement actual API calls to Make.com endpoints
 - [x] Add enhanced error handling and validation
 - [x] Add basic test coverage
-- [ ] Add team and organization management
+- [x] Add team and organization management
 - [ ] Add data store management
 - [ ] Add more comprehensive test coverage including acceptance tests
 - [ ] Add advanced configuration options for webhooks and connections

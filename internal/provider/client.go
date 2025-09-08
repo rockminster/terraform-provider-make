@@ -406,3 +406,209 @@ func (c *MakeAPIClient) DeleteWebhook(ctx context.Context, id string) error {
 
 	return nil
 }
+
+// TeamResponse represents a Make.com team from the API
+type TeamResponse struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	OrganizationID string `json:"organization_id,omitempty"`
+}
+
+// TeamRequest represents the request payload for creating/updating teams
+type TeamRequest struct {
+	Name           string `json:"name"`
+	OrganizationID string `json:"organization_id,omitempty"`
+}
+
+// CreateTeam creates a new team in Make.com
+func (c *MakeAPIClient) CreateTeam(ctx context.Context, req TeamRequest) (*TeamResponse, error) {
+	resp, err := c.MakeRequest(ctx, "POST", "v2/teams", req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var team TeamResponse
+	if err := json.NewDecoder(resp.Body).Decode(&team); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &team, nil
+}
+
+// GetTeam retrieves a team by ID from Make.com
+func (c *MakeAPIClient) GetTeam(ctx context.Context, id string) (*TeamResponse, error) {
+	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("team with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var team TeamResponse
+	if err := json.NewDecoder(resp.Body).Decode(&team); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &team, nil
+}
+
+// UpdateTeam updates an existing team in Make.com
+func (c *MakeAPIClient) UpdateTeam(ctx context.Context, id string, req TeamRequest) (*TeamResponse, error) {
+	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("team with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var team TeamResponse
+	if err := json.NewDecoder(resp.Body).Decode(&team); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &team, nil
+}
+
+// DeleteTeam deletes a team from Make.com
+func (c *MakeAPIClient) DeleteTeam(ctx context.Context, id string) error {
+	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		// Already deleted or doesn't exist
+		return nil
+	}
+
+	if resp.StatusCode >= 400 {
+		return c.HandleErrorResponse(resp)
+	}
+
+	return nil
+}
+
+// OrganizationResponse represents a Make.com organization from the API
+type OrganizationResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// OrganizationRequest represents the request payload for creating/updating organizations
+type OrganizationRequest struct {
+	Name string `json:"name"`
+}
+
+// CreateOrganization creates a new organization in Make.com
+func (c *MakeAPIClient) CreateOrganization(ctx context.Context, req OrganizationRequest) (*OrganizationResponse, error) {
+	resp, err := c.MakeRequest(ctx, "POST", "v2/organizations", req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var org OrganizationResponse
+	if err := json.NewDecoder(resp.Body).Decode(&org); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &org, nil
+}
+
+// GetOrganization retrieves an organization by ID from Make.com
+func (c *MakeAPIClient) GetOrganization(ctx context.Context, id string) (*OrganizationResponse, error) {
+	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("organization with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var org OrganizationResponse
+	if err := json.NewDecoder(resp.Body).Decode(&org); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &org, nil
+}
+
+// UpdateOrganization updates an existing organization in Make.com
+func (c *MakeAPIClient) UpdateOrganization(ctx context.Context, id string, req OrganizationRequest) (*OrganizationResponse, error) {
+	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("organization with ID %s not found", id)
+	}
+
+	if resp.StatusCode >= 400 {
+		return nil, c.HandleErrorResponse(resp)
+	}
+
+	var org OrganizationResponse
+	if err := json.NewDecoder(resp.Body).Decode(&org); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &org, nil
+}
+
+// DeleteOrganization deletes an organization from Make.com
+func (c *MakeAPIClient) DeleteOrganization(ctx context.Context, id string) error {
+	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		// Already deleted or doesn't exist
+		return nil
+	}
+
+	if resp.StatusCode >= 400 {
+		return c.HandleErrorResponse(resp)
+	}
+
+	return nil
+}
