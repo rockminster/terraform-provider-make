@@ -151,7 +151,24 @@ func (r *WebhookResource) Create(ctx context.Context, req resource.CreateRequest
 	if len(webhook.Settings) > 0 {
 		settingsVals := make(map[string]attr.Value, len(webhook.Settings))
 		for k, v := range webhook.Settings {
-			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+			var strVal string
+			switch val := v.(type) {
+			case string:
+				strVal = val
+			case fmt.Stringer:
+				strVal = val.String()
+			case int, int8, int16, int32, int64:
+				strVal = fmt.Sprintf("%d", val)
+			case uint, uint8, uint16, uint32, uint64:
+				strVal = fmt.Sprintf("%d", val)
+			case float32, float64:
+				strVal = fmt.Sprintf("%f", val)
+			case bool:
+				strVal = fmt.Sprintf("%t", val)
+			default:
+				strVal = fmt.Sprintf("%v", val)
+			}
+			settingsVals[k] = types.StringValue(strVal)
 		}
 		data.Settings = types.MapValueMust(types.StringType, settingsVals)
 	}
