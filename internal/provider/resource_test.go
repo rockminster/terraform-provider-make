@@ -115,3 +115,73 @@ resource "make_webhook" "test" {
 }
 `
 }
+
+func TestAccTeamResource(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTeamResourceConfig("example"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_team.test", "name", "Test Team example"),
+					resource.TestCheckResourceAttrSet("make_team.test", "id"),
+				),
+			},
+			{
+				ResourceName:      "make_team.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccTeamResourceConfig("updated"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_team.test", "name", "Test Team updated"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTeamResourceConfig(suffix string) string {
+	return `
+resource "make_team" "test" {
+  name = "Test Team ` + suffix + `"
+}
+`
+}
+
+func TestAccOrganizationResource(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOrganizationResourceConfig("example"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_organization.test", "name", "Test Organization example"),
+					resource.TestCheckResourceAttrSet("make_organization.test", "id"),
+				),
+			},
+			{
+				ResourceName:      "make_organization.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccOrganizationResourceConfig("updated"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_organization.test", "name", "Test Organization updated"),
+				),
+			},
+		},
+	})
+}
+
+func testAccOrganizationResourceConfig(suffix string) string {
+	return `
+resource "make_organization" "test" {
+  name = "Test Organization ` + suffix + `"
+}
+`
+}
