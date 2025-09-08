@@ -739,7 +739,7 @@ func convertSettingsToStringMap(settings map[string]interface{}) map[string]attr
 		case uint, uint8, uint16, uint32, uint64:
 			strVal = fmt.Sprintf("%d", val)
 		case float32, float64:
-			strVal = fmt.Sprintf("%f", val)
+			strVal = fmt.Sprintf("%g", val)
 		case bool:
 			strVal = fmt.Sprintf("%t", val)
 		default:
