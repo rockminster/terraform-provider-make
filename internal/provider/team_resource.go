@@ -179,6 +179,8 @@ func (r *TeamResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	if team.OrganizationID != "" {
 		data.OrganizationId = types.StringValue(team.OrganizationID)
+	} else {
+		data.OrganizationId = types.StringNull()
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
