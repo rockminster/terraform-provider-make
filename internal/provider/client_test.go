@@ -155,8 +155,8 @@ func TestConvertSettingsToStringMap(t *testing.T) {
 
 	// Test float conversion
 	floatVal := result["float_val"].(types.String)
-	if floatVal.ValueString() != "3.140000" {
-		t.Errorf("Expected float_val to be '3.140000', got %s", floatVal.ValueString())
+	if floatVal.ValueString() != "3.14" {
+		t.Errorf("Expected float_val to be '3.14', got %s", floatVal.ValueString())
 	}
 
 	// Test bool conversion
@@ -176,5 +176,44 @@ func TestConvertSettingsToStringMap(t *testing.T) {
 	expectedComplex := "map[key:value]"
 	if complexVal.ValueString() != expectedComplex {
 		t.Errorf("Expected complex_val to be '%s', got %s", expectedComplex, complexVal.ValueString())
+	}
+}
+
+func TestConvertSettingsToStringMapFloatPrecision(t *testing.T) {
+	// Test edge cases for float precision that were problematic with %f
+	settings := map[string]interface{}{
+		"very_small":       0.0000001,     // Should not become 0.000000
+		"high_precision":   3.1415926535,  // Should preserve more than 6 decimals
+		"scientific_small": 1e-7,          // Should use scientific notation
+		"scientific_large": 1e10,          // Should use scientific notation
+		"zero":             0.0,           // Should be "0"
+		"simple_decimal":   1.5,           // Should be "1.5"
+		"trailing_zeros":   1.50000,       // Should be "1.5" (remove trailing zeros)
+		"float32_val":      float32(2.5),  // Test float32 specifically
+		"float64_val":      float64(7.25), // Test float64 specifically
+	}
+
+	result := convertSettingsToStringMap(settings)
+
+	tests := []struct {
+		key      string
+		expected string
+	}{
+		{"very_small", "1e-07"},
+		{"high_precision", "3.1415926535"},
+		{"scientific_small", "1e-07"},
+		{"scientific_large", "1e+10"},
+		{"zero", "0"},
+		{"simple_decimal", "1.5"},
+		{"trailing_zeros", "1.5"},
+		{"float32_val", "2.5"},
+		{"float64_val", "7.25"},
+	}
+
+	for _, test := range tests {
+		val := result[test.key].(types.String)
+		if val.ValueString() != test.expected {
+			t.Errorf("Expected %s to be '%s', got '%s'", test.key, test.expected, val.ValueString())
+		}
 	}
 }
