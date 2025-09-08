@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -29,6 +30,7 @@ type ConnectionDataSourceModel struct {
 	AppName  types.String `tfsdk:"app_name"`
 	TeamId   types.String `tfsdk:"team_id"`
 	Verified types.Bool   `tfsdk:"verified"`
+	Settings types.Map    `tfsdk:"settings"`
 }
 
 func (d *ConnectionDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -60,6 +62,11 @@ func (d *ConnectionDataSource) Schema(ctx context.Context, req datasource.Schema
 			"verified": schema.BoolAttribute{
 				MarkdownDescription: "Whether the connection is verified",
 				Computed:            true,
+			},
+			"settings": schema.MapAttribute{
+				MarkdownDescription: "Advanced settings for the connection",
+				Computed:            true,
+				ElementType:         types.StringType,
 			},
 		},
 	}
@@ -112,6 +119,16 @@ func (d *ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		data.TeamId = types.StringValue(connection.TeamID)
 	} else {
 		data.TeamId = types.StringNull()
+	}
+
+	if len(connection.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(connection.Settings))
+		for k, v := range connection.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+	} else {
+		data.Settings = types.MapNull(types.StringType)
 	}
 
 	// Write logs using the tflog package

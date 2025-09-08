@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +33,7 @@ type ConnectionResourceModel struct {
 	Name     types.String `tfsdk:"name"`
 	AppName  types.String `tfsdk:"app_name"`
 	TeamId   types.String `tfsdk:"team_id"`
+	Settings types.Map    `tfsdk:"settings"`
 	Verified types.Bool   `tfsdk:"verified"`
 }
 
@@ -63,6 +65,11 @@ func (r *ConnectionResource) Schema(ctx context.Context, req resource.SchemaRequ
 			"team_id": schema.StringAttribute{
 				MarkdownDescription: "Team ID where the connection belongs",
 				Optional:            true,
+			},
+			"settings": schema.MapAttribute{
+				MarkdownDescription: "Advanced settings for the connection",
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 			"verified": schema.BoolAttribute{
 				MarkdownDescription: "Whether the connection is verified",
@@ -112,6 +119,18 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 		apiReq.TeamID = data.TeamId.ValueString()
 	}
 
+	if !data.Settings.IsNull() {
+		var settingsMap map[string]string
+		resp.Diagnostics.Append(data.Settings.ElementsAs(ctx, &settingsMap, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		apiReq.Settings = make(map[string]interface{}, len(settingsMap))
+		for k, v := range settingsMap {
+			apiReq.Settings[k] = v
+		}
+	}
+
 	// Create the connection via API
 	connection, err := r.client.CreateConnection(ctx, apiReq)
 	if err != nil {
@@ -127,6 +146,14 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if connection.TeamID != "" {
 		data.TeamId = types.StringValue(connection.TeamID)
+	}
+
+	if len(connection.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(connection.Settings))
+		for k, v := range connection.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
 	}
 
 	// Write logs using the tflog package
@@ -165,6 +192,16 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 		data.TeamId = types.StringNull()
 	}
 
+	if len(connection.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(connection.Settings))
+		for k, v := range connection.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+	} else {
+		data.Settings = types.MapNull(types.StringType)
+	}
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -189,6 +226,18 @@ func (r *ConnectionResource) Update(ctx context.Context, req resource.UpdateRequ
 		apiReq.TeamID = data.TeamId.ValueString()
 	}
 
+	if !data.Settings.IsNull() {
+		var settingsMap map[string]string
+		resp.Diagnostics.Append(data.Settings.ElementsAs(ctx, &settingsMap, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		apiReq.Settings = make(map[string]interface{}, len(settingsMap))
+		for k, v := range settingsMap {
+			apiReq.Settings[k] = v
+		}
+	}
+
 	// Update the connection via API
 	connection, err := r.client.UpdateConnection(ctx, data.Id.ValueString(), apiReq)
 	if err != nil {
@@ -206,6 +255,16 @@ func (r *ConnectionResource) Update(ctx context.Context, req resource.UpdateRequ
 		data.TeamId = types.StringValue(connection.TeamID)
 	} else {
 		data.TeamId = types.StringNull()
+	}
+
+	if len(connection.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(connection.Settings))
+		for k, v := range connection.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+	} else {
+		data.Settings = types.MapNull(types.StringType)
 	}
 
 	// Save updated data into Terraform state

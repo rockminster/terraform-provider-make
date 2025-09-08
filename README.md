@@ -126,6 +126,9 @@ resource "make_connection" "example" {
   name     = "Gmail Connection"
   app_name = "gmail"
   team_id  = "team-123"
+  settings = {
+    api_key = "my-key"
+  }
 }
 ```
 
@@ -134,6 +137,7 @@ resource "make_connection" "example" {
 - `name` (Required) - Name of the connection
 - `app_name` (Required) - Name of the app for this connection (e.g., 'gmail', 'slack')
 - `team_id` (Optional) - Team ID where the connection belongs
+- `settings` (Optional) - Advanced settings for the connection
 
 #### Attributes
 
@@ -151,6 +155,9 @@ resource "make_webhook" "example" {
   name    = "Incoming Webhook"
   team_id = "team-456"
   active  = true
+  settings = {
+    secret = "s3cr3t"
+  }
 }
 ```
 
@@ -159,6 +166,7 @@ resource "make_webhook" "example" {
 - `name` (Required) - Name of the webhook
 - `team_id` (Optional) - Team ID where the webhook belongs
 - `active` (Optional) - Whether the webhook is active
+- `settings` (Optional) - Advanced settings for the webhook
 
 #### Attributes
 
@@ -398,4 +406,4 @@ This provider is designed to work with the Make.com API. For more information ab
 - [x] Add team and organization management
 - [x] Add data store management
 - [x] Add more comprehensive test coverage including acceptance tests
-- [ ] Add advanced configuration options for webhooks and connections
+- [x] Add advanced configuration options for webhooks and connections

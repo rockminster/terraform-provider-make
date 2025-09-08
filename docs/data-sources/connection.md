@@ -31,3 +31,4 @@ data "make_connection" "example" {
 - `name` (String) Name of the connection
 - `team_id` (String) Team ID where the connection belongs
 - `verified` (Boolean) Whether the connection is verified
+- `settings` (Map of String) Advanced settings for the connection

@@ -191,11 +191,12 @@ func (c *MakeAPIClient) DeleteScenario(ctx context.Context, id string) error {
 
 // ConnectionResponse represents a Make.com connection from the API
 type ConnectionResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	AppName  string `json:"app_name"`
-	TeamID   string `json:"team_id,omitempty"`
-	Verified bool   `json:"verified"`
+	ID       string                 `json:"id"`
+	Name     string                 `json:"name"`
+	AppName  string                 `json:"app_name"`
+	TeamID   string                 `json:"team_id,omitempty"`
+	Verified bool                   `json:"verified"`
+	Settings map[string]interface{} `json:"settings,omitempty"`
 }
 
 // ConnectionRequest represents the request payload for creating connections

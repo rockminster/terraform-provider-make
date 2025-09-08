@@ -47,6 +47,7 @@ func TestAccConnectionDataSource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("data.make_connection.test", "name", "Test Connection"),
 					resource.TestCheckResourceAttr("data.make_connection.test", "app_name", "gmail"),
+					resource.TestCheckResourceAttr("data.make_connection.test", "settings.api_key", "dummy"),
 					resource.TestCheckResourceAttrSet("data.make_connection.test", "verified"),
 				),
 			},
@@ -59,6 +60,9 @@ func testAccConnectionDataSourceConfig() string {
 resource "make_connection" "test" {
   name     = "Test Connection"
   app_name = "gmail"
+  settings = {
+    api_key = "dummy"
+  }
 }
 
 data "make_connection" "test" {
