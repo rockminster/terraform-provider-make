@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -122,11 +121,7 @@ func (d *ConnectionDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	if len(connection.Settings) > 0 {
-		settingsVals := make(map[string]attr.Value, len(connection.Settings))
-		for k, v := range connection.Settings {
-			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+		data.Settings = types.MapValueMust(types.StringType, convertSettingsToStringMap(connection.Settings))
 	} else {
 		data.Settings = types.MapNull(types.StringType)
 	}

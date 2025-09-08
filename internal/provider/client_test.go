@@ -122,3 +122,59 @@ func TestDataStoreResourceModel(t *testing.T) {
 		t.Errorf("Expected Description to be 'Test Description', got %s", model.Description.ValueString())
 	}
 }
+
+func TestConvertSettingsToStringMap(t *testing.T) {
+	// Test various data types
+	settings := map[string]interface{}{
+		"string_val":  "test_string",
+		"int_val":     42,
+		"float_val":   3.14,
+		"bool_val":    true,
+		"uint_val":    uint(100),
+		"complex_val": map[string]string{"key": "value"}, // Will use fmt.Sprintf fallback
+	}
+
+	result := convertSettingsToStringMap(settings)
+
+	// Verify we got the expected number of keys
+	if len(result) != len(settings) {
+		t.Errorf("Expected %d keys, got %d", len(settings), len(result))
+	}
+
+	// Test string conversion
+	stringVal := result["string_val"].(types.String)
+	if stringVal.ValueString() != "test_string" {
+		t.Errorf("Expected string_val to be 'test_string', got %s", stringVal.ValueString())
+	}
+
+	// Test int conversion
+	intVal := result["int_val"].(types.String)
+	if intVal.ValueString() != "42" {
+		t.Errorf("Expected int_val to be '42', got %s", intVal.ValueString())
+	}
+
+	// Test float conversion
+	floatVal := result["float_val"].(types.String)
+	if floatVal.ValueString() != "3.140000" {
+		t.Errorf("Expected float_val to be '3.140000', got %s", floatVal.ValueString())
+	}
+
+	// Test bool conversion
+	boolVal := result["bool_val"].(types.String)
+	if boolVal.ValueString() != "true" {
+		t.Errorf("Expected bool_val to be 'true', got %s", boolVal.ValueString())
+	}
+
+	// Test uint conversion
+	uintVal := result["uint_val"].(types.String)
+	if uintVal.ValueString() != "100" {
+		t.Errorf("Expected uint_val to be '100', got %s", uintVal.ValueString())
+	}
+
+	// Test complex type fallback
+	complexVal := result["complex_val"].(types.String)
+	expectedComplex := "map[key:value]"
+	if complexVal.ValueString() != expectedComplex {
+		t.Errorf("Expected complex_val to be '%s', got %s", expectedComplex, complexVal.ValueString())
+	}
+}

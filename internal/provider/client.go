@@ -9,6 +9,9 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // ScenarioResponse represents a Make.com scenario from the API
@@ -718,4 +721,31 @@ func (c *MakeAPIClient) DeleteDataStore(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+// convertSettingsToStringMap converts a map[string]interface{} to map[string]attr.Value
+// with explicit type handling for better string representations
+func convertSettingsToStringMap(settings map[string]interface{}) map[string]attr.Value {
+	settingsVals := make(map[string]attr.Value, len(settings))
+	for k, v := range settings {
+		var strVal string
+		switch val := v.(type) {
+		case string:
+			strVal = val
+		case fmt.Stringer:
+			strVal = val.String()
+		case int, int8, int16, int32, int64:
+			strVal = fmt.Sprintf("%d", val)
+		case uint, uint8, uint16, uint32, uint64:
+			strVal = fmt.Sprintf("%d", val)
+		case float32, float64:
+			strVal = fmt.Sprintf("%f", val)
+		case bool:
+			strVal = fmt.Sprintf("%t", val)
+		default:
+			strVal = fmt.Sprintf("%v", val)
+		}
+		settingsVals[k] = types.StringValue(strVal)
+	}
+	return settingsVals
 }
