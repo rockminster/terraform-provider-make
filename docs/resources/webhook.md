@@ -17,6 +17,9 @@ resource "make_webhook" "example" {
   name    = "My Webhook"
   team_id = "team-456"
   active  = true
+  settings = {
+    secret = "s3cr3t"
+  }
 }
 ```
 
@@ -31,6 +34,7 @@ resource "make_webhook" "example" {
 
 - `active` (Boolean) Whether the webhook is active
 - `team_id` (String) Team ID where the webhook belongs
+- `settings` (Map of String) Advanced settings for the webhook
 
 ### Read-Only
 

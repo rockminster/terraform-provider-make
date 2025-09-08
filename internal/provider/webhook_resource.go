@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -28,11 +29,12 @@ type WebhookResource struct {
 
 // WebhookResourceModel describes the resource data model.
 type WebhookResourceModel struct {
-	Id     types.String `tfsdk:"id"`
-	Name   types.String `tfsdk:"name"`
-	URL    types.String `tfsdk:"url"`
-	TeamId types.String `tfsdk:"team_id"`
-	Active types.Bool   `tfsdk:"active"`
+	Id       types.String `tfsdk:"id"`
+	Name     types.String `tfsdk:"name"`
+	URL      types.String `tfsdk:"url"`
+	TeamId   types.String `tfsdk:"team_id"`
+	Active   types.Bool   `tfsdk:"active"`
+	Settings types.Map    `tfsdk:"settings"`
 }
 
 func (r *WebhookResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -67,6 +69,11 @@ func (r *WebhookResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"active": schema.BoolAttribute{
 				MarkdownDescription: "Whether the webhook is active",
 				Optional:            true,
+			},
+			"settings": schema.MapAttribute{
+				MarkdownDescription: "Advanced settings for the webhook",
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 		},
 	}
@@ -112,6 +119,18 @@ func (r *WebhookResource) Create(ctx context.Context, req resource.CreateRequest
 		apiReq.TeamID = data.TeamId.ValueString()
 	}
 
+	if !data.Settings.IsNull() {
+		var settingsMap map[string]string
+		resp.Diagnostics.Append(data.Settings.ElementsAs(ctx, &settingsMap, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		apiReq.Settings = make(map[string]interface{}, len(settingsMap))
+		for k, v := range settingsMap {
+			apiReq.Settings[k] = v
+		}
+	}
+
 	// Create the webhook via API
 	webhook, err := r.client.CreateWebhook(ctx, apiReq)
 	if err != nil {
@@ -127,6 +146,31 @@ func (r *WebhookResource) Create(ctx context.Context, req resource.CreateRequest
 
 	if webhook.TeamID != "" {
 		data.TeamId = types.StringValue(webhook.TeamID)
+	}
+
+	if len(webhook.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(webhook.Settings))
+		for k, v := range webhook.Settings {
+			var strVal string
+			switch val := v.(type) {
+			case string:
+				strVal = val
+			case fmt.Stringer:
+				strVal = val.String()
+			case int, int8, int16, int32, int64:
+				strVal = fmt.Sprintf("%d", val)
+			case uint, uint8, uint16, uint32, uint64:
+				strVal = fmt.Sprintf("%d", val)
+			case float32, float64:
+				strVal = fmt.Sprintf("%f", val)
+			case bool:
+				strVal = fmt.Sprintf("%t", val)
+			default:
+				strVal = fmt.Sprintf("%v", val)
+			}
+			settingsVals[k] = types.StringValue(strVal)
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
 	}
 
 	// Write logs using the tflog package
@@ -165,6 +209,16 @@ func (r *WebhookResource) Read(ctx context.Context, req resource.ReadRequest, re
 		data.TeamId = types.StringNull()
 	}
 
+	if len(webhook.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(webhook.Settings))
+		for k, v := range webhook.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+	} else {
+		data.Settings = types.MapNull(types.StringType)
+	}
+
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -189,6 +243,18 @@ func (r *WebhookResource) Update(ctx context.Context, req resource.UpdateRequest
 		apiReq.TeamID = data.TeamId.ValueString()
 	}
 
+	if !data.Settings.IsNull() {
+		var settingsMap map[string]string
+		resp.Diagnostics.Append(data.Settings.ElementsAs(ctx, &settingsMap, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		apiReq.Settings = make(map[string]interface{}, len(settingsMap))
+		for k, v := range settingsMap {
+			apiReq.Settings[k] = v
+		}
+	}
+
 	// Update the webhook via API
 	webhook, err := r.client.UpdateWebhook(ctx, data.Id.ValueString(), apiReq)
 	if err != nil {
@@ -206,6 +272,16 @@ func (r *WebhookResource) Update(ctx context.Context, req resource.UpdateRequest
 		data.TeamId = types.StringValue(webhook.TeamID)
 	} else {
 		data.TeamId = types.StringNull()
+	}
+
+	if len(webhook.Settings) > 0 {
+		settingsVals := make(map[string]attr.Value, len(webhook.Settings))
+		for k, v := range webhook.Settings {
+			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+	} else {
+		data.Settings = types.MapNull(types.StringType)
 	}
 
 	// Save updated data into Terraform state

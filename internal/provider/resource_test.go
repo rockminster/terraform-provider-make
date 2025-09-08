@@ -59,6 +59,7 @@ func TestAccConnectionResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("make_connection.test", "name", "Test Connection example"),
 					resource.TestCheckResourceAttr("make_connection.test", "app_name", "gmail"),
+					resource.TestCheckResourceAttr("make_connection.test", "settings.api_key", "dummy"),
 					resource.TestCheckResourceAttrSet("make_connection.test", "id"),
 					resource.TestCheckResourceAttrSet("make_connection.test", "verified"),
 				),
@@ -78,6 +79,9 @@ func testAccConnectionResourceConfig(suffix string) string {
 resource "make_connection" "test" {
   name     = "Test Connection ` + suffix + `"
   app_name = "gmail"
+  settings = {
+    api_key = "dummy"
+  }
 }
 `
 }
@@ -93,6 +97,7 @@ func TestAccWebhookResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("make_webhook.test", "name", "Test Webhook example"),
 					resource.TestCheckResourceAttr("make_webhook.test", "active", "true"),
+					resource.TestCheckResourceAttr("make_webhook.test", "settings.secret", "s3cr3t"),
 					resource.TestCheckResourceAttrSet("make_webhook.test", "id"),
 					resource.TestCheckResourceAttrSet("make_webhook.test", "url"),
 				),
@@ -112,6 +117,9 @@ func testAccWebhookResourceConfig(suffix string) string {
 resource "make_webhook" "test" {
   name   = "Test Webhook ` + suffix + `"
   active = true
+  settings = {
+    secret = "s3cr3t"
+  }
 }
 `
 }

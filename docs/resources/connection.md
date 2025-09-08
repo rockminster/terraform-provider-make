@@ -17,6 +17,9 @@ resource "make_connection" "example" {
   name     = "My Gmail Connection"
   app_name = "gmail"
   team_id  = "team-123"
+  settings = {
+    api_key = "my-key"
+  }
 }
 ```
 
@@ -31,6 +34,7 @@ resource "make_connection" "example" {
 ### Optional
 
 - `team_id` (String) Team ID where the connection belongs
+- `settings` (Map of String) Advanced settings for the connection
 
 ### Read-Only
 
