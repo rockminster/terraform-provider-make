@@ -207,6 +207,30 @@ resource "make_organization" "example" {
 
 - `id` - Organization identifier
 
+### make_data_store
+
+Manages Make.com data stores.
+
+#### Example Usage
+
+```hcl
+resource "make_data_store" "example" {
+  name        = "My Data Store"
+  description = "Example data store"
+  team_id     = "team-123"
+}
+```
+
+#### Arguments
+
+- `name` (Required) - Name of the data store
+- `description` (Optional) - Description of the data store
+- `team_id` (Optional) - Team ID where the data store belongs
+
+#### Attributes
+
+- `id` - Data store identifier
+
 ## Available Data Sources
 
 ### make_scenario
@@ -296,6 +320,28 @@ data "make_organization" "example" {
 
 - `name` - Name of the organization
 
+### make_data_store
+
+Reads information about an existing Make.com data store.
+
+#### Example Usage
+
+```hcl
+data "make_data_store" "example" {
+  id = "data-store-id-123"
+}
+```
+
+#### Arguments
+
+- `id` (Required) - Data store identifier
+
+#### Attributes
+
+- `name` - Name of the data store
+- `description` - Description of the data store
+- `team_id` - Team ID where the data store belongs
+
 ## Developing the Provider
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
@@ -350,6 +396,6 @@ This provider is designed to work with the Make.com API. For more information ab
 - [x] Add enhanced error handling and validation
 - [x] Add basic test coverage
 - [x] Add team and organization management
-- [ ] Add data store management
+- [x] Add data store management
 - [ ] Add more comprehensive test coverage including acceptance tests
 - [ ] Add advanced configuration options for webhooks and connections

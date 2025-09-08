@@ -185,3 +185,40 @@ resource "make_organization" "test" {
 }
 `
 }
+
+func TestAccDataStoreResource(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataStoreResourceConfig("example"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_data_store.test", "name", "Test Data Store example"),
+					resource.TestCheckResourceAttr("make_data_store.test", "description", "Test data store description"),
+					resource.TestCheckResourceAttrSet("make_data_store.test", "id"),
+				),
+			},
+			{
+				ResourceName:      "make_data_store.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDataStoreResourceConfig("updated"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("make_data_store.test", "name", "Test Data Store updated"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataStoreResourceConfig(suffix string) string {
+	return `
+resource "make_data_store" "test" {
+  name        = "Test Data Store ` + suffix + `"
+  description = "Test data store description"
+}
+`
+}

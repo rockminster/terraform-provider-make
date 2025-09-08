@@ -110,6 +110,7 @@ func (p *MakeProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewWebhookResource,
 		NewTeamResource,
 		NewOrganizationResource,
+		NewDataStoreResource,
 	}
 }
 
@@ -119,6 +120,7 @@ func (p *MakeProvider) DataSources(ctx context.Context) []func() datasource.Data
 		NewConnectionDataSource,
 		NewTeamDataSource,
 		NewOrganizationDataSource,
+		NewDataStoreDataSource,
 	}
 }
 
