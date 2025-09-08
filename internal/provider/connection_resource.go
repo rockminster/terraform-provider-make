@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -149,11 +148,7 @@ func (r *ConnectionResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	if len(connection.Settings) > 0 {
-		settingsVals := make(map[string]attr.Value, len(connection.Settings))
-		for k, v := range connection.Settings {
-			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+		data.Settings = types.MapValueMust(types.StringType, convertSettingsToStringMap(connection.Settings))
 	}
 
 	// Write logs using the tflog package
@@ -193,11 +188,7 @@ func (r *ConnectionResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	if len(connection.Settings) > 0 {
-		settingsVals := make(map[string]attr.Value, len(connection.Settings))
-		for k, v := range connection.Settings {
-			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+		data.Settings = types.MapValueMust(types.StringType, convertSettingsToStringMap(connection.Settings))
 	} else {
 		data.Settings = types.MapNull(types.StringType)
 	}
@@ -258,11 +249,7 @@ func (r *ConnectionResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if len(connection.Settings) > 0 {
-		settingsVals := make(map[string]attr.Value, len(connection.Settings))
-		for k, v := range connection.Settings {
-			settingsVals[k] = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		data.Settings = types.MapValueMust(types.StringType, settingsVals)
+		data.Settings = types.MapValueMust(types.StringType, convertSettingsToStringMap(connection.Settings))
 	} else {
 		data.Settings = types.MapNull(types.StringType)
 	}
