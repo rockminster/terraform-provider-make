@@ -225,5 +225,5 @@ func (r *DataStoreResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *DataStoreResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

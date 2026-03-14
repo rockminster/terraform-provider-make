@@ -14,6 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// maxResponseBodySize limits the maximum size of API response bodies to prevent
+// excessive memory consumption from unexpectedly large responses (10 MB).
+const maxResponseBodySize = 10 * 1024 * 1024
+
 // ScenarioResponse represents a Make.com scenario from the API
 type ScenarioResponse struct {
 	ID          string `json:"id"`
@@ -66,6 +70,9 @@ func (c *MakeAPIClient) MakeRequest(ctx context.Context, method, endpoint string
 	req.Header.Set("Authorization", "Token "+c.ApiToken)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+	if c.UserAgent != "" {
+		req.Header.Set("User-Agent", c.UserAgent)
+	}
 
 	// Perform the request
 	resp, err := c.HTTPClient.Do(req)
@@ -76,11 +83,10 @@ func (c *MakeAPIClient) MakeRequest(ctx context.Context, method, endpoint string
 	return resp, nil
 }
 
-// HandleErrorResponse processes error responses from the API
+// HandleErrorResponse processes error responses from the API.
+// The caller is responsible for closing the response body.
 func (c *MakeAPIClient) HandleErrorResponse(resp *http.Response) error {
-	defer func() { _ = resp.Body.Close() }()
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBodySize))
 	if err != nil {
 		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, resp.Status)
 	}
@@ -123,7 +129,7 @@ func (c *MakeAPIClient) CreateScenario(ctx context.Context, req ScenarioRequest)
 
 // GetScenario retrieves a scenario by ID from Make.com
 func (c *MakeAPIClient) GetScenario(ctx context.Context, id string) (*ScenarioResponse, error) {
-	endpoint := fmt.Sprintf("v2/scenarios/%s", id)
+	endpoint := fmt.Sprintf("v2/scenarios/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -148,7 +154,7 @@ func (c *MakeAPIClient) GetScenario(ctx context.Context, id string) (*ScenarioRe
 
 // UpdateScenario updates an existing scenario in Make.com
 func (c *MakeAPIClient) UpdateScenario(ctx context.Context, id string, req ScenarioRequest) (*ScenarioResponse, error) {
-	endpoint := fmt.Sprintf("v2/scenarios/%s", id)
+	endpoint := fmt.Sprintf("v2/scenarios/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -173,7 +179,7 @@ func (c *MakeAPIClient) UpdateScenario(ctx context.Context, id string, req Scena
 
 // DeleteScenario deletes a scenario from Make.com
 func (c *MakeAPIClient) DeleteScenario(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/scenarios/%s", id)
+	endpoint := fmt.Sprintf("v2/scenarios/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err
@@ -232,7 +238,7 @@ func (c *MakeAPIClient) CreateConnection(ctx context.Context, req ConnectionRequ
 
 // GetConnection retrieves a connection by ID from Make.com
 func (c *MakeAPIClient) GetConnection(ctx context.Context, id string) (*ConnectionResponse, error) {
-	endpoint := fmt.Sprintf("v2/connections/%s", id)
+	endpoint := fmt.Sprintf("v2/connections/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -257,7 +263,7 @@ func (c *MakeAPIClient) GetConnection(ctx context.Context, id string) (*Connecti
 
 // UpdateConnection updates an existing connection in Make.com
 func (c *MakeAPIClient) UpdateConnection(ctx context.Context, id string, req ConnectionRequest) (*ConnectionResponse, error) {
-	endpoint := fmt.Sprintf("v2/connections/%s", id)
+	endpoint := fmt.Sprintf("v2/connections/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -282,7 +288,7 @@ func (c *MakeAPIClient) UpdateConnection(ctx context.Context, id string, req Con
 
 // DeleteConnection deletes a connection from Make.com
 func (c *MakeAPIClient) DeleteConnection(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/connections/%s", id)
+	endpoint := fmt.Sprintf("v2/connections/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err
@@ -342,7 +348,7 @@ func (c *MakeAPIClient) CreateWebhook(ctx context.Context, req WebhookRequest) (
 
 // GetWebhook retrieves a webhook by ID from Make.com
 func (c *MakeAPIClient) GetWebhook(ctx context.Context, id string) (*WebhookResponse, error) {
-	endpoint := fmt.Sprintf("v2/webhooks/%s", id)
+	endpoint := fmt.Sprintf("v2/webhooks/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -367,7 +373,7 @@ func (c *MakeAPIClient) GetWebhook(ctx context.Context, id string) (*WebhookResp
 
 // UpdateWebhook updates an existing webhook in Make.com
 func (c *MakeAPIClient) UpdateWebhook(ctx context.Context, id string, req WebhookRequest) (*WebhookResponse, error) {
-	endpoint := fmt.Sprintf("v2/webhooks/%s", id)
+	endpoint := fmt.Sprintf("v2/webhooks/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -392,7 +398,7 @@ func (c *MakeAPIClient) UpdateWebhook(ctx context.Context, id string, req Webhoo
 
 // DeleteWebhook deletes a webhook from Make.com
 func (c *MakeAPIClient) DeleteWebhook(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/webhooks/%s", id)
+	endpoint := fmt.Sprintf("v2/webhooks/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err
@@ -446,7 +452,7 @@ func (c *MakeAPIClient) CreateTeam(ctx context.Context, req TeamRequest) (*TeamR
 
 // GetTeam retrieves a team by ID from Make.com
 func (c *MakeAPIClient) GetTeam(ctx context.Context, id string) (*TeamResponse, error) {
-	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	endpoint := fmt.Sprintf("v2/teams/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -471,7 +477,7 @@ func (c *MakeAPIClient) GetTeam(ctx context.Context, id string) (*TeamResponse, 
 
 // UpdateTeam updates an existing team in Make.com
 func (c *MakeAPIClient) UpdateTeam(ctx context.Context, id string, req TeamRequest) (*TeamResponse, error) {
-	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	endpoint := fmt.Sprintf("v2/teams/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -496,7 +502,7 @@ func (c *MakeAPIClient) UpdateTeam(ctx context.Context, id string, req TeamReque
 
 // DeleteTeam deletes a team from Make.com
 func (c *MakeAPIClient) DeleteTeam(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/teams/%s", id)
+	endpoint := fmt.Sprintf("v2/teams/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err
@@ -548,7 +554,7 @@ func (c *MakeAPIClient) CreateOrganization(ctx context.Context, req Organization
 
 // GetOrganization retrieves an organization by ID from Make.com
 func (c *MakeAPIClient) GetOrganization(ctx context.Context, id string) (*OrganizationResponse, error) {
-	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	endpoint := fmt.Sprintf("v2/organizations/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -573,7 +579,7 @@ func (c *MakeAPIClient) GetOrganization(ctx context.Context, id string) (*Organi
 
 // UpdateOrganization updates an existing organization in Make.com
 func (c *MakeAPIClient) UpdateOrganization(ctx context.Context, id string, req OrganizationRequest) (*OrganizationResponse, error) {
-	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	endpoint := fmt.Sprintf("v2/organizations/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -598,7 +604,7 @@ func (c *MakeAPIClient) UpdateOrganization(ctx context.Context, id string, req O
 
 // DeleteOrganization deletes an organization from Make.com
 func (c *MakeAPIClient) DeleteOrganization(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/organizations/%s", id)
+	endpoint := fmt.Sprintf("v2/organizations/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err
@@ -654,7 +660,7 @@ func (c *MakeAPIClient) CreateDataStore(ctx context.Context, req DataStoreReques
 
 // GetDataStore retrieves a data store by ID from Make.com
 func (c *MakeAPIClient) GetDataStore(ctx context.Context, id string) (*DataStoreResponse, error) {
-	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	endpoint := fmt.Sprintf("v2/data-stores/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -679,7 +685,7 @@ func (c *MakeAPIClient) GetDataStore(ctx context.Context, id string) (*DataStore
 
 // UpdateDataStore updates an existing data store in Make.com
 func (c *MakeAPIClient) UpdateDataStore(ctx context.Context, id string, req DataStoreRequest) (*DataStoreResponse, error) {
-	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	endpoint := fmt.Sprintf("v2/data-stores/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "PUT", endpoint, req)
 	if err != nil {
 		return nil, err
@@ -704,7 +710,7 @@ func (c *MakeAPIClient) UpdateDataStore(ctx context.Context, id string, req Data
 
 // DeleteDataStore deletes a data store from Make.com
 func (c *MakeAPIClient) DeleteDataStore(ctx context.Context, id string) error {
-	endpoint := fmt.Sprintf("v2/data-stores/%s", id)
+	endpoint := fmt.Sprintf("v2/data-stores/%s", url.PathEscape(id))
 	resp, err := c.MakeRequest(ctx, "DELETE", endpoint, nil)
 	if err != nil {
 		return err

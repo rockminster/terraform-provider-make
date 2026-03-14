@@ -92,8 +92,9 @@ func (p *MakeProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	// Create API client
 	client := &MakeAPIClient{
-		ApiToken: apiToken,
-		BaseUrl:  baseUrl,
+		ApiToken:  apiToken,
+		BaseUrl:   baseUrl,
+		UserAgent: "terraform-provider-make/" + p.version,
 		HTTPClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -142,5 +143,6 @@ func New(version string) func() provider.Provider {
 type MakeAPIClient struct {
 	ApiToken   string
 	BaseUrl    string
+	UserAgent  string
 	HTTPClient *http.Client
 }
